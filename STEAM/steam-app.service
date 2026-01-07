@@ -1,0 +1,17 @@
+[Unit]
+Description=STEAM Sensor Application
+After=network.target pigpiod.service
+Requires=pigpiod.service
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/STEAM
+ExecStart=/home/pi/STEAM/venv/bin/python /home/pi/STEAM/main.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

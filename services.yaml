@@ -1,7 +1,7 @@
 version: "3.5"
 services:
   postgres:
-    image: postgres
+    image: postgres:14
     container_name: postgresql_steam
     ports:
       - 5432:5432
@@ -9,6 +9,32 @@ services:
       - POSTGRES_USER=nikslav
       - POSTGRES_PASSWORD=1234
       - POSTGRES_DB=steam
-    volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nikslav -d steam"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+  ml-service:
+    build: ./ml-service
+    container_name: steam_ml_service
+    ports:
+      - "5005:5000"
+    volumes:
+      - ./STEAM/yolo11n.pt:/app/yolo11n.pt:ro
+
+  backend:
+    build: .
+    container_name: steam_backend
+    ports:
+      - "13869:13869"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ml-service:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql_steam:5432/steam
+      - SPRING_DATASOURCE_USERNAME=nikslav
+      - SPRING_DATASOURCE_PASSWORD=1234
+      - ML_SERVICE_URL=http://steam_ml_service:5000
