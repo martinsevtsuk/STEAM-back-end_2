@@ -76,3 +76,24 @@ I ran a simulation script (`simulate_camera.py`) which performed the following:
    ```bash
    pip install -r requirements.txt
    ```
+
+O
+
+The web application (Spring Boot backend) is accessible at http://localhost:13869.
+
+Main Access Points
+View Results (GET): To see the history of people counts stored in the database, use: http://localhost:13869/api/camera/get?number_limit=10
+ML Service Status (GET): The dedicated ML service is accessible on port 5005: http://localhost:5005/health
+Process Frames (POST): The new endpoint for processing camera frames (used by the Raspberry Pi or the simulation script) is: http://localhost:13869/api/camera/frames/process
+Quick Verification
+You can use the simulation script I created to verify the connection immediately:
+
+bash
+python3 simulate_camera.py
+This will send a dummy frame to the backend and then fetch the latest record from the database to confirm everything is working end-to-end.
+
+Docker Status
+You can monitor the live logs of all services to see the traffic flowing between them:
+
+bash
+docker-compose -f services.yaml logs -f
